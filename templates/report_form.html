@@ -1,0 +1,156 @@
+﻿{% extends "base.html" %}
+{% block title %}Buat Laporan - SILAJAK{% endblock %}
+{% block page_title %}Buat Laporan Jalan Rusak{% endblock %}
+{% block content %}
+<form class="report-form" method="post" enctype="multipart/form-data">
+  <section class="panel form-panel">
+    <h2>Informasi Laporan</h2>
+    <div class="form-grid">
+      <label><span class="field-label">Judul Laporan <span class="req">*</span></span>
+        <input type="text" name="title" required placeholder="Contoh: Jalan berlubang di depan pasar">
+      </label>
+      <label><span class="field-label">Deskripsi Kerusakan <span class="req">*</span></span>
+        <textarea name="description" rows="5" required placeholder="Jelaskan kondisi jalan rusak"></textarea>
+      </label>
+      <label>Keterangan Tambahan
+        <textarea name="additional_note" rows="3" placeholder="Patokan lokasi, kondisi sekitar, atau catatan lain"></textarea>
+      </label>
+    </div>
+  </section>
+
+  <section class="panel form-panel">
+    <h2>Pilih Ruas Jalan dari Map View <span class="req">*</span></h2>
+    <div class="map-tools">
+      <input id="roadSearch" type="search" placeholder="Cari nama jalan atau area">
+      <button class="btn btn-secondary" id="useMyLocation" type="button">Gunakan Lokasi Saya</button>
+    </div>
+    <div id="reportMap" class="map-box large"></div>
+    <div class="selected-location">
+      <strong>Ruas jalan terpilih:</strong>
+      <span id="selectedRoadText">Belum dipilih</span>
+    </div>
+    <input type="hidden" id="roadName" name="road_name" required>
+    <input type="hidden" id="address" name="address">
+    <input type="hidden" id="latitude" name="latitude" required>
+    <input type="hidden" id="longitude" name="longitude" required>
+  </section>
+
+  <section class="panel form-panel">
+    <h2>Upload Foto atau Video <span class="req">*</span></h2>
+    <p class="muted">Minimal 1 file wajib diunggah agar sistem dapat menjalankan deteksi pothole.</p>
+    <label class="upload-box">
+      <input id="mediaInput" type="file" name="media" accept="image/*,video/*" required>
+      <span>Pilih foto atau video jalan rusak</span>
+      <small>JPG, JPEG, PNG, MP4, MOV, AVI</small>
+    </label>
+    <div id="mediaPreview" class="media-preview"></div>
+  </section>
+
+  <section id="detectionProgress" class="panel form-panel detection-progress" hidden>
+    <h2>Memproses Deteksi Pothole</h2>
+    <p id="detectionProgressMessage" class="muted">Mengunggah berkas...</p>
+    <div class="progress" role="progressbar" aria-label="Progres deteksi" aria-valuemin="0" aria-valuemax="100">
+      <div id="detectionProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%">0%</div>
+    </div>
+    <p id="detectionProgressError" class="text-danger mt-2 mb-0" hidden></p>
+  </section>
+
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="{{ url_for('dashboard') }}">Batal</a>
+    <button class="btn btn-primary" type="submit">Kirim Laporan</button>
+  </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    const form = document.querySelector(".report-form");
+    if (!form) return;
+    const wrap = document.getElementById("detectionProgress");
+    const bar = document.getElementById("detectionProgressBar");
+    const messageEl = document.getElementById("detectionProgressMessage");
+    const errorEl = document.getElementById("detectionProgressError");
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    function setBar(percent) {
+      // percent === null -> indeterminate (bar penuh beranimasi tanpa angka)
+      if (percent === null || percent === undefined) {
+        bar.style.width = "100%";
+        bar.classList.add("progress-bar-striped", "progress-bar-animated");
+        bar.textContent = "";
+        return;
+      }
+      const p = Math.max(0, Math.min(100, Math.round(percent)));
+      bar.classList.remove("progress-bar-striped", "progress-bar-animated");
+      bar.style.width = p + "%";
+      bar.textContent = p + "%";
+    }
+
+    function showError(msg) {
+      errorEl.textContent = msg;
+      errorEl.hidden = false;
+      bar.classList.add("bg-danger");
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Kirim Laporan"; }
+    }
+
+    function poll(progressUrl, reportUrl) {
+      fetch(progressUrl, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+        .then((r) => r.json())
+        .then((data) => {
+          if (!data.ok) { showError(data.error || "Gagal mengambil status deteksi."); return; }
+          messageEl.textContent = data.message || "Memproses...";
+          setBar(data.percent);
+          if (data.status === "done") {
+            setBar(100);
+            messageEl.textContent = "Deteksi selesai. Mengalihkan ke hasil...";
+            window.location.href = data.report_url || reportUrl;
+          } else if (data.status === "error") {
+            showError(data.error || "Deteksi gagal diproses.");
+          } else {
+            setTimeout(() => poll(progressUrl, reportUrl), 700);
+          }
+        })
+        .catch(() => setTimeout(() => poll(progressUrl, reportUrl), 1200));
+    }
+
+    form.addEventListener("submit", function (event) {
+      if (!form.checkValidity()) return; // biarkan validasi bawaan browser muncul
+      event.preventDefault();
+
+      wrap.hidden = false;
+      errorEl.hidden = true;
+      bar.classList.remove("bg-danger");
+      setBar(null);
+      messageEl.textContent = "Mengunggah berkas...";
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Memproses..."; }
+      wrap.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", form.getAttribute("action") || window.location.href);
+      xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+
+      xhr.upload.addEventListener("progress", function (e) {
+        if (e.lengthComputable) {
+          messageEl.textContent = "Mengunggah berkas... " + Math.round((e.loaded / e.total) * 100) + "%";
+          setBar(null);
+        }
+      });
+
+      xhr.onload = function () {
+        let data;
+        try { data = JSON.parse(xhr.responseText); } catch (err) { showError("Respons server tidak valid."); return; }
+        if (xhr.status >= 200 && xhr.status < 300 && data.ok) {
+          messageEl.textContent = "Berkas terunggah. Memulai deteksi...";
+          setBar(0);
+          poll(data.progress_url, data.report_url);
+        } else {
+          showError((data && data.error) || "Gagal mengirim laporan.");
+        }
+      };
+      xhr.onerror = function () { showError("Koneksi ke server gagal."); };
+      xhr.send(new FormData(form));
+    });
+  })();
+</script>
+{% endblock %}

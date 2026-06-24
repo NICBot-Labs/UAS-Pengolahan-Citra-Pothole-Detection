@@ -1,0 +1,7 @@
+﻿Flask==3.0.3
+Werkzeug==3.0.3
+PyMySQL==1.1.1
+numpy
+opencv-python
+torch
+torchvision

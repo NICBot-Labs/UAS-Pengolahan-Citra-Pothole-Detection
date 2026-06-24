@@ -1,0 +1,180 @@
+﻿{% extends "base.html" %}
+{% block title %}Detail Laporan - SILAJAK{% endblock %}
+{% block page_title %}Detail Laporan{% endblock %}
+{% block content %}
+<section class="detail-header panel">
+  <div>
+    <p class="eyebrow">Laporan #{{ report.id }}</p>
+    <h2>{{ report.title }}</h2>
+    <p>{{ report.description }}</p>
+  </div>
+  <div class="detail-badges">
+    <span class="badge status-{{ report.status|replace(' ', '-')|lower }}">{{ report.status }}</span>
+    <span class="damage damage-{{ (report.damage_level or 'belum')|lower }}">{{ report.damage_level or 'Belum Ada'
+      }}</span>
+  </div>
+</section>
+
+<section class="content-grid two">
+  <article class="panel">
+    <h2>Lokasi dan Ruas Jalan</h2>
+    <dl class="info-list">
+      <dt>Ruas Jalan</dt>
+      <dd>{{ report.road_name }}</dd>
+      <dt>Alamat</dt>
+      <dd>{{ report.address or '-' }}</dd>
+      <dt>Koordinat</dt>
+      <dd>{{ report.latitude }}, {{ report.longitude }}</dd>
+      <dt>Pelapor</dt>
+      <dd>{{ report.reporter_name }}</dd>
+      <dt>Petugas</dt>
+      <dd>{{ report.officer_name or 'Belum ditugaskan' }}</dd>
+    </dl>
+    <div id="detailMap" class="map-box" data-lat="{{ report.latitude }}" data-lng="{{ report.longitude }}"
+      data-road="{{ report.road_name }}"></div>
+  </article>
+
+  <article class="panel">
+    <h2>Media Unggahan</h2>
+    <div class="media-grid">
+      {% for item in media %}
+      <figure class="media-card">
+        {% if item.file_type == 'image' %}
+        <img src="{{ url_for('uploaded_file', filename=item.file_path) }}" alt="{{ item.original_name }}">
+        {% else %}
+        <video controls src="{{ url_for('uploaded_file', filename=item.file_path) }}"></video>
+        {% endif %}
+        <figcaption>{{ item.original_name }}</figcaption>
+      </figure>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+
+<section class="panel">
+  <div class="section-head compact">
+    <div>
+      <h2>Hasil Deteksi Pothole</h2>
+    </div>
+  </div>
+  <div class="detection-grid">
+    {% for detection in detections %}
+    <article class="detection-card">
+      <strong>{{ 'Terdeteksi Lubang' if detection.detected else 'Tidak Terdeteksi Lubang' }}</strong>
+      <span>Jumlah lubang: {{ detection.pothole_count }}</span>
+      <span>Confidence: {{ detection.confidence }}</span>
+      <span>Status kerusakan: {{ detection.damage_status }}</span>
+      {% if detection.result_file_path %}
+      {% if detection.result_file_path.lower().endswith(('.jpg', '.jpeg', '.png')) %}
+      <img class="detection-result-media" src="{{ url_for('uploaded_file', filename=detection.result_file_path) }}"
+        alt="Hasil deteksi pothole">
+      {% else %}
+      <video class="detection-result-media" controls
+        src="{{ url_for('uploaded_file', filename=detection.result_file_path) }}"></video>
+      {% endif %}
+      {% endif %}
+
+      <a class="btn btn-secondary btn-small" href="{{ url_for('uploaded_file', filename=detection.result_file_path) }}"
+        target="_blank">Lihat hasil deteksi</a>
+    </article>
+    {% else %}
+    <p class="empty-state">Belum ada hasil deteksi.</p>
+    {% endfor %}
+  </div>
+</section>
+
+{% if current_user.role == 'admin' %}
+<section class="content-grid">
+  <form class="panel" method="post" action="{{ url_for('report_verify', report_id=report.id) }}">
+    <h2>Verifikasi Admin</h2>
+    <label>Aksi
+      <select name="action" id="verifyAction">
+        <option value="Ditugaskan ke Petugas" {% if report.status=='Ditugaskan ke Petugas' %}selected{% endif %}>
+          Tugaskan ke Petugas</option>
+        <option value="Ditolak" {% if report.status=='Ditolak' %}selected{% endif %}>Tolak Laporan</option>
+        <option value="Selesai" {% if report.status=='Selesai' %}selected{% endif %}>Tandai Selesai</option>
+      </select>
+    </label>
+    <label id="officerField">Petugas Lapangan
+      <select name="officer_id">
+        <option value="">Pilih petugas</option>
+        {% for officer in officers %}
+        <option value="{{ officer.id }}" {% if officer.id==report.assigned_officer_id %}selected{% endif %}>{{
+          officer.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <p class="muted">Prioritas otomatis: <strong>{{ priority }}</strong></p>
+    <label>Catatan (opsional)
+      <textarea name="verification_note" rows="3">{{ report.verification_note or '' }}</textarea>
+    </label>
+    <button class="btn btn-primary" type="submit">Simpan Verifikasi</button>
+  </form>
+</section>
+{% endif %}
+
+{% if current_user.role == 'petugas' %}
+<form class="panel" method="post" enctype="multipart/form-data"
+  action="{{ url_for('handling_update', report_id=report.id) }}">
+  <h2>Update Status Penanganan</h2>
+  <label>Status
+    <select name="status">
+      <option>Dalam Penanganan</option>
+      <option>Menunggu Verifikasi Selesai</option>
+    </select>
+  </label>
+  <label>Catatan Petugas
+    <textarea name="note" rows="4"></textarea>
+  </label>
+  <label>Bukti Penanganan
+    <input type="file" name="proof" accept="image/*,video/*">
+    <small class="muted">Wajib diunggah saat memilih "Menunggu Verifikasi Selesai" agar admin dapat
+      memverifikasi.</small>
+  </label>
+  <button class="btn btn-primary" type="submit">Update Status</button>
+</form>
+{% endif %}
+
+<section class="panel">
+  <h2>Riwayat Penanganan</h2>
+  <div class="timeline">
+    <article><strong>Laporan dibuat</strong><span>{{ report.created_at }}</span></article>
+    {% if report.verification_note %}<article><strong>Catatan admin</strong><span>{{ report.verification_note }}</span>
+    </article>{% endif %}
+    {% for update in updates %}
+    <article><strong>{{ update.status }}</strong><span>{{ update.created_at }} - {{ update.officer_name }}</span>
+      {% if update.note %}<p>{{ update.note }}</p>{% endif %}
+      {% if update.proof_file_path %}
+      <div class="proof-media">
+        <span class="proof-label">Bukti perbaikan:</span>
+        {% if update.proof_file_path.lower().endswith(('.jpg', '.jpeg', '.png')) %}
+        <img class="detection-result-media" src="{{ url_for('uploaded_file', filename=update.proof_file_path) }}"
+          alt="Bukti perbaikan">
+        {% else %}
+        <video class="detection-result-media" controls
+          src="{{ url_for('uploaded_file', filename=update.proof_file_path) }}"></video>
+        {% endif %}
+        <a class="btn btn-secondary btn-small" href="{{ url_for('uploaded_file', filename=update.proof_file_path) }}"
+          target="_blank">Lihat bukti</a>
+      </div>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    const action = document.getElementById("verifyAction");
+    const officerField = document.getElementById("officerField");
+    if (!action || !officerField) return;
+    function toggle() {
+      officerField.style.display = action.value === "Ditugaskan ke Petugas" ? "" : "none";
+    }
+    action.addEventListener("change", toggle);
+    toggle();
+  })();
+</script>
+{% endblock %}

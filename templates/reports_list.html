@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Data Laporan - SILAJAK{% endblock %}
+{% block page_title %}Data Laporan{% endblock %}
+{% block content %}
+<form class="filter-bar" method="get">
+  <input type="search" name="q" placeholder="Cari judul, ruas jalan, atau pelapor" value="{{ keyword }}">
+  <select name="status">
+    <option value="">Semua status</option>
+    {% for item in report_statuses %}
+      <option value="{{ item }}" {% if item == status %}selected{% endif %}>{{ item }}</option>
+    {% endfor %}
+  </select>
+  <label class="filter-date">Dari
+    <input type="date" name="start" value="{{ start_date }}">
+  </label>
+  <label class="filter-date">Sampai
+    <input type="date" name="end" value="{{ end_date }}">
+  </label>
+  <button class="btn btn-primary" type="submit">Filter</button>
+  {% if keyword or status or start_date or end_date %}
+    <a class="btn btn-secondary" href="{{ url_for('reports_list') }}">Reset</a>
+  {% endif %}
+</form>
+
+{% if charts %}
+<section class="chart-grid">
+  <article class="panel chart-card">
+    <h2>Tren Laporan per Tanggal</h2>
+    <canvas id="chartTrend"></canvas>
+  </article>
+  <article class="panel chart-card">
+    <h2>Jumlah per Status</h2>
+    <canvas id="chartStatus"></canvas>
+  </article>
+  <article class="panel chart-card">
+    <h2>Jumlah per Tingkat Kerusakan</h2>
+    <canvas id="chartDamage"></canvas>
+  </article>
+</section>
+{% endif %}
+
+{% include '_report_table.html' %}
+{% endblock %}
+
+{% block scripts %}
+{% if charts %}
+<script src="{{ url_for('static', filename='js/chart.umd.min.js') }}"></script>
+<script id="chartData" type="application/json">{{ charts|tojson }}</script>
+<script>
+  renderReportCharts(
+    JSON.parse(document.getElementById("chartData").textContent),
+    { trend: "chartTrend", status: "chartStatus", damage: "chartDamage" }
+  );
+</script>
+{% endif %}
+{% endblock %}

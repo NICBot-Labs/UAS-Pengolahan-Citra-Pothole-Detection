@@ -1,0 +1,64 @@
+﻿{% extends "base.html" %}
+{% block title %}Dashboard Admin - SILAJAK{% endblock %}
+{% block page_title %}Dashboard Admin{% endblock %}
+{% block content %}
+<section class="stats-grid">
+  <article class="stat-card"><span>Total Laporan</span><strong>{{ total }}</strong></article>
+  {% for status, count in stats.items() %}
+    <article class="stat-card"><span>{{ status }}</span><strong>{{ count }}</strong></article>
+  {% endfor %}
+</section>
+<section class="content-grid two">
+  <div class="panel">
+    <div class="section-head compact">
+      <div>
+        <h2>Peta Sebaran Laporan</h2>
+        <p>Marker laporan berdasarkan lokasi dari map view.</p>
+      </div>
+    </div>
+    <div id="adminMap" class="map-box"></div>
+  </div>
+  <div class="panel">
+    <div class="section-head compact">
+      <div>
+        <h2>Laporan Terbaru</h2>
+        <p>Prioritaskan laporan menunggu verifikasi.</p>
+      </div>
+    </div>
+    {% set reports = reports %}
+    {% include '_report_table.html' %}
+  </div>
+</section>
+
+{% if charts %}
+<section class="chart-grid">
+  <article class="panel chart-card">
+    <h2>Tren Laporan per Tanggal</h2>
+    <canvas id="chartTrend"></canvas>
+  </article>
+  <article class="panel chart-card">
+    <h2>Jumlah per Status</h2>
+    <canvas id="chartStatus"></canvas>
+  </article>
+  <article class="panel chart-card">
+    <h2>Jumlah per Tingkat Kerusakan</h2>
+    <canvas id="chartDamage"></canvas>
+  </article>
+</section>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+  window.SILAJAK_REPORT_MARKERS = {{ (all_reports or [])|tojson }};
+</script>
+{% if charts %}
+<script src="{{ url_for('static', filename='js/chart.umd.min.js') }}"></script>
+<script id="chartData" type="application/json">{{ charts|tojson }}</script>
+<script>
+  renderReportCharts(
+    JSON.parse(document.getElementById("chartData").textContent),
+    { trend: "chartTrend", status: "chartStatus", damage: "chartDamage" }
+  );
+</script>
+{% endif %}
+{% endblock %}

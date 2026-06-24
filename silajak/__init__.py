@@ -1,0 +1,1 @@
+"""SILAJAK application package."""

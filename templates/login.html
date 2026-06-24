@@ -1,0 +1,22 @@
+﻿{% extends "base.html" %}
+{% block title %}Login - SILAJAK{% endblock %}
+{% block public_content %}
+<main class="auth-page">
+  <form class="auth-card" method="post">
+    <a class="brand centered" href="{{ url_for('index') }}"><span class="brand-mark"></span><strong>SILAJAK</strong></a>
+    <h1>Login Pengguna</h1>
+    <label>Email</label>
+    <input type="email" name="email" required placeholder="email@contoh.com">
+    <label>Password</label>
+    <input type="password" name="password" required placeholder="Password">
+    <button class="btn btn-primary full" type="submit">Login</button>
+    <p>Belum punya akun? <a href="{{ url_for('register') }}">Registrasi masyarakat</a></p>
+    <div class="demo-box">
+      <strong>Akun demo</strong>
+      <span>Admin: admin@silajak.test / admin123</span>
+      <span>Petugas: petugas@silajak.test / petugas123</span>
+      <span>Warga: user@silajak.test / user123</span>
+    </div>
+  </form>
+</main>
+{% endblock %}

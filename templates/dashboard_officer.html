@@ -1,0 +1,18 @@
+﻿{% extends "base.html" %}
+{% block title %}Dashboard Petugas - SILAJAK{% endblock %}
+{% block page_title %}Dashboard Petugas{% endblock %}
+{% block content %}
+<section class="stats-grid">
+  <article class="stat-card"><span>Tugas Baru</span><strong>{{ stats.new }}</strong></article>
+  <article class="stat-card"><span>Dalam Penanganan</span><strong>{{ stats.progress }}</strong></article>
+  <article class="stat-card"><span>Menunggu Verifikasi Selesai</span><strong>{{ stats.pending_final }}</strong></article>
+  <article class="stat-card"><span>Selesai</span><strong>{{ stats.done }}</strong></article>
+</section>
+<section class="section-head">
+  <div>
+    <h2>Tugas Lapangan</h2>
+    <p>Lihat lokasi, hasil deteksi, dan perbarui status penanganan.</p>
+  </div>
+</section>
+{% include '_report_table.html' %}
+{% endblock %}

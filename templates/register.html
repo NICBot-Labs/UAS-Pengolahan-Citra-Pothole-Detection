@@ -1,0 +1,22 @@
+﻿{% extends "base.html" %}
+{% block title %}Registrasi - SILAJAK{% endblock %}
+{% block public_content %}
+<main class="auth-page">
+  <form class="auth-card" method="post">
+    <a class="brand centered" href="{{ url_for('index') }}"><span class="brand-mark"></span><strong>SILAJAK</strong></a>
+    <h1>Registrasi Masyarakat</h1>
+    <label>Nama Lengkap</label>
+    <input type="text" name="name" required>
+    <label>Email</label>
+    <input type="email" name="email" required>
+    <label>Nomor Telepon</label>
+    <input type="text" name="phone">
+    <label>Password</label>
+    <input type="password" name="password" required>
+    <label>Konfirmasi Password</label>
+    <input type="password" name="confirm_password" required>
+    <button class="btn btn-primary full" type="submit">Buat Akun</button>
+    <p>Sudah punya akun? <a href="{{ url_for('login') }}">Login</a></p>
+  </form>
+</main>
+{% endblock %}

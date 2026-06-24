@@ -1,0 +1,155 @@
+﻿{% extends "base.html" %}
+{% block title %}SILAJAK - Sistem Informasi Laporan Jalan Rusak{% endblock %}
+{% block page_header %}{% endblock %}
+{% block public_content %}
+<main class="home-page">
+  <section id="homeHeroCarousel" class="home-hero carousel slide carousel-fade rounded-4 overflow-hidden shadow-sm mb-4"
+    data-bs-ride="carousel" data-bs-interval="4500">
+    <div class="carousel-indicators">
+      <button type="button" data-bs-target="#homeHeroCarousel" data-bs-slide-to="0" class="active" aria-current="true"
+        aria-label="Slide 1"></button>
+      <button type="button" data-bs-target="#homeHeroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+      <button type="button" data-bs-target="#homeHeroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    </div>
+
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img src="{{ url_for('static', filename='images/hero/hero01.jpg') }}" class="d-block w-100 hero-image"
+          alt="Jalan dan infrastruktur kota">
+        <div class="hero-overlay"></div>
+        <div class="carousel-caption hero-caption text-start">
+          <span class="badge text-bg-light text-success mb-3">Pelaporan jalan rusak berbasis peta</span>
+          <h1 class="display-4 fw-bold mb-3">Laporkan jalan rusak lebih cepat, jelas, dan terpantau.</h1>
+          <p class="lead mb-4">SILAJAK membantu masyarakat mengirim laporan kerusakan jalan dengan map view, upload
+            bukti wajib, dan dukungan deteksi pothole dari backend Python.</p>
+          <div class="d-flex flex-column flex-sm-row gap-2 mb-4">
+            <a class="btn btn-light btn-lg" href="{{ url_for('register') }}"><i
+                class="bi bi-person-plus me-2"></i>Daftar dan Buat Laporan</a>
+            <a class="btn btn-outline-light btn-lg" href="{{ url_for('login') }}"><i
+                class="bi bi-box-arrow-in-right me-2"></i>Login</a>
+          </div>
+          <div class="row g-3 hero-points">
+            <div class="col-sm-4"><strong>Map View</strong><span>Pilih ruas jalan langsung</span></div>
+            <div class="col-sm-4"><strong>Upload Wajib</strong><span>Foto/video sebagai bukti</span></div>
+            <div class="col-sm-4"><strong>Deteksi AI</strong><span>Hasil deteksi pothole</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="carousel-item">
+        <img src="{{ url_for('static', filename='images/hero/hero02.jpg') }}" class="d-block w-100 hero-image"
+          alt="Jaringan jalan perkotaan">
+        <div class="hero-overlay"></div>
+        <div class="carousel-caption hero-caption text-start">
+          <span class="badge text-bg-light text-success mb-3">Lokasi lebih akurat</span>
+          <h1 class="display-4 fw-bold mb-3">Pilih ruas jalan langsung dari peta.</h1>
+          <p class="lead mb-4">Setiap laporan menyimpan nama ruas jalan, alamat, latitude, dan longitude agar admin dan
+            petugas lebih mudah menemukan lokasi kerusakan.</p>
+          <a class="btn btn-light btn-lg" href="{{ url_for('register') }}"><i class="bi bi-geo-alt me-2"></i>Mulai
+            Melapor</a>
+        </div>
+      </div>
+
+      <div class="carousel-item">
+        <img src="{{ url_for('static', filename='images/hero/hero03.jpg') }}" class="d-block w-100 hero-image"
+          alt="Pekerjaan perbaikan jalan">
+        <div class="hero-overlay"></div>
+        <div class="carousel-caption hero-caption text-start">
+          <span class="badge text-bg-light text-success mb-3">Verifikasi dan penanganan</span>
+          <h1 class="display-4 fw-bold mb-3">Pantau status dari verifikasi sampai selesai.</h1>
+          <p class="lead mb-4">Admin memverifikasi laporan, menugaskan petugas lapangan, dan masyarakat dapat melihat
+            perkembangan status laporan.</p>
+          <a class="btn btn-light btn-lg" href="{{ url_for('login') }}"><i class="bi bi-speedometer2 me-2"></i>Masuk ke
+            Dashboard</a>
+        </div>
+      </div>
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#homeHeroCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Sebelumnya</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#homeHeroCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Berikutnya</span>
+    </button>
+  </section>
+
+
+  <section class="gallery-section py-5">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold">Galeri Kondisi Jalan</h2>
+      <p class="text-secondary">
+        Dokumentasi kondisi jalan yang dilaporkan dan ditangani.
+      </p>
+    </div>
+    <div class="row g-4">
+      {% for i in range(1,7) %}
+      <div class="col-lg-4 col-md-6">
+        <div class="gallery-card">
+          <img src="{{ url_for('static', filename='images/galeri/jalan' ~ i ~ '.png') }}" alt="Galeri Jalan {{ i }}">
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="row g-3 mb-4">
+    <div class="col-md-4">
+      <article class="info-card h-100 p-4 bg-white rounded-4 shadow-sm border">
+        <i class="bi bi-map text-success fs-1"></i>
+        <h2 class="h5 fw-bold mt-3">Pilih Ruas Jalan</h2>
+        <p class="text-secondary mb-0">Pengguna memilih titik dan ruas jalan langsung dari peta agar lokasi laporan
+          lebih akurat.</p>
+      </article>
+    </div>
+    <div class="col-md-4">
+      <article class="info-card h-100 p-4 bg-white rounded-4 shadow-sm border">
+        <i class="bi bi-camera-video text-success fs-1"></i>
+        <h2 class="h5 fw-bold mt-3">Upload Bukti Wajib</h2>
+        <p class="text-secondary mb-0">Setiap laporan wajib memiliki foto atau video sehingga admin punya bukti
+          pendukung.</p>
+      </article>
+    </div>
+    <div class="col-md-4">
+      <article class="info-card h-100 p-4 bg-white rounded-4 shadow-sm border">
+        <i class="bi bi-cpu text-success fs-1"></i>
+        <h2 class="h5 fw-bold mt-3">Deteksi Pothole</h2>
+        <p class="text-secondary mb-0">Media diproses backend Python untuk memberi informasi pendukung seperti jumlah
+          lubang dan tingkat kerusakan.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="bg-white rounded-4 shadow-sm border p-4 p-lg-5 mb-4">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-4">
+        <p class="eyebrow mb-2">Alur Laporan</p>
+        <h2 class="fw-bold mb-3">Dari laporan warga sampai penanganan lapangan.</h2>
+        <p class="text-secondary mb-0">SILAJAK menyatukan masyarakat, admin, dan petugas dalam satu alur kerja yang
+          mudah dipantau.</p>
+      </div>
+      <div class="col-lg-8">
+        <div class="row g-3 process-grid">
+          <div class="col-md-6">
+            <div class="process-step"><span>1</span><strong>Buat Laporan</strong><small>Isi judul, deskripsi, dan
+                keterangan tambahan.</small></div>
+          </div>
+          <div class="col-md-6">
+            <div class="process-step"><span>2</span><strong>Pilih Lokasi</strong><small>Pilih ruas jalan langsung dari
+                map view.</small></div>
+          </div>
+          <div class="col-md-6">
+            <div class="process-step"><span>3</span><strong>Upload Media</strong><small>Unggah foto atau video sebagai
+                bukti wajib.</small></div>
+          </div>
+          <div class="col-md-6">
+            <div class="process-step"><span>4</span><strong>Pantau Status</strong><small>Lihat deteksi, verifikasi,
+                penugasan, dan status selesai.</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}

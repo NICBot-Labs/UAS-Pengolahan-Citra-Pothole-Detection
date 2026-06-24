@@ -1,0 +1,19 @@
+﻿{% extends "base.html" %}
+{% block title %}Dashboard Masyarakat - SILAJAK{% endblock %}
+{% block page_title %}Dashboard Masyarakat{% endblock %}
+{% block content %}
+<section class="stats-grid">
+  <article class="stat-card"><span>Total Laporan</span><strong>{{ stats.total }}</strong></article>
+  <article class="stat-card"><span>Menunggu</span><strong>{{ stats.waiting }}</strong></article>
+  <article class="stat-card"><span>Proses</span><strong>{{ stats.progress }}</strong></article>
+  <article class="stat-card"><span>Selesai</span><strong>{{ stats.done }}</strong></article>
+</section>
+<section class="section-head">
+  <div>
+    <h2>Riwayat Laporan Saya</h2>
+    <p>Pantau status dan hasil deteksi pothole dari laporan yang sudah dikirim.</p>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('report_new') }}">Buat Laporan</a>
+</section>
+{% include '_report_table.html' %}
+{% endblock %}

@@ -1,0 +1,31 @@
+﻿<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Judul</th>
+        <th>Ruas Jalan</th>
+        <th>Status</th>
+        <th>Kerusakan</th>
+        <th>Tanggal</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for report in reports %}
+        <tr>
+          <td>
+            <strong>{{ report.title }}</strong>
+            {% if report.reporter_name is defined %}<small>Pelapor: {{ report.reporter_name }}</small>{% endif %}
+          </td>
+          <td>{{ report.road_name }}</td>
+          <td><span class="badge status-{{ report.status|replace(' ', '-')|lower }}">{{ report.status }}</span></td>
+          <td><span class="damage damage-{{ (report.damage_level or 'belum')|lower }}">{{ report.damage_level or 'Belum Ada' }}</span></td>
+          <td>{{ report.created_at }}</td>
+          <td><a class="btn btn-info small" href="{{ url_for('report_detail', report_id=report.id) }}">Detail</a></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="6" class="empty-state">Belum ada laporan.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

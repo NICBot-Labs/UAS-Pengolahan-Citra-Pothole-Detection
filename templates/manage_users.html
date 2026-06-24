@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Kelola Pengguna - SILAJAK{% endblock %}
+{% block page_title %}Kelola Pengguna{% endblock %}
+{% block content %}
+<section class="panel">
+  <h2>Tambah Pengguna</h2>
+  <form method="post" action="{{ url_for('user_create') }}" class="user-create-form">
+    <label><span class="field-label">Nama <span class="req">*</span></span>
+      <input type="text" name="name" required placeholder="Nama lengkap">
+    </label>
+    <label><span class="field-label">Email <span class="req">*</span></span>
+      <input type="email" name="email" required placeholder="email@contoh.com">
+    </label>
+    <label><span class="field-label">Telepon</span>
+      <input type="text" name="phone" placeholder="08xxxxxxxxxx">
+    </label>
+    <label><span class="field-label">Password <span class="req">*</span></span>
+      <input type="password" name="password" required placeholder="Password awal">
+    </label>
+    <label><span class="field-label">Role <span class="req">*</span></span>
+      <select name="role">
+        {% for r in roles %}
+        <option value="{{ r }}" {% if r == 'masyarakat' %}selected{% endif %}>{{ r|capitalize }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button class="btn btn-primary" type="submit">Tambah Pengguna</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Daftar Pengguna</h2>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Email</th>
+          <th>Role / Akses</th>
+          <th>Password Baru</th>
+          <th>Terdaftar</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td><strong>{{ u.name }}</strong>{% if u.id == current_user.id %} <small>(Anda)</small>{% endif %}</td>
+          <td><input type="email" name="email" value="{{ u.email }}" form="edit{{ u.id }}" required></td>
+          <td>
+            <select name="role" form="edit{{ u.id }}" {% if u.id == current_user.id %}disabled{% endif %}>
+              {% for r in roles %}
+              <option value="{{ r }}" {% if r == u.role %}selected{% endif %}>{{ r|capitalize }}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td><input type="password" name="password" placeholder="(kosongkan jika tetap)" minlength="6" form="edit{{ u.id }}"></td>
+          <td>{{ u.created_at }}</td>
+          <td class="user-actions">
+            <form id="edit{{ u.id }}" method="post" action="{{ url_for('user_update', user_id=u.id) }}" class="inline-form">
+              <button class="btn btn-info btn-small" type="submit">Simpan</button>
+            </form>
+            <form method="post" action="{{ url_for('user_delete', user_id=u.id) }}" class="inline-form"
+              onsubmit="return confirm('Hapus pengguna {{ u.name }}? Tindakan ini permanen.');">
+              <button class="btn btn-danger btn-small" type="submit" {% if u.id == current_user.id %}disabled{% endif %}>Hapus</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="empty-state">Belum ada pengguna.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
